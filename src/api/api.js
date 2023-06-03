@@ -13,6 +13,7 @@ export const tags = new TagsApi(undefined, INVENTORY_API_BASE, instance);
 export const systemProfile = new SystemProfileApi(undefined, INVENTORY_API_BASE, instance);
 
 export const getEntitySystemProfile = (item) => hosts.apiHostGetHostSystemProfileById([item]);
+export const EDGE_API = '/api/edge/v1';
 
 /* eslint camelcase: off */
 export const mapData = ({ facts = {}, ...oneResult }) => ({
@@ -258,3 +259,65 @@ export function getAllTags(search, pagination = {}) {
 export function getOperatingSystems(params = []) {
     return systemProfile.apiSystemProfileGetOperatingSystem(...params);
 }
+
+export const getTableParams = (q) => {
+    if (q === undefined) {
+        return '';
+    }
+
+    const query = Object.keys(q).reduce((acc, curr) => {
+        let value = undefined;
+        if (
+            typeof q[curr] === 'object' &&
+            typeof q[curr].length === 'number' &&
+            q[curr].length > 0
+        ) {
+            value = q[curr].reduce(
+                (multiVals, val) =>
+                    multiVals === '' ? `${curr}=${val}` : `${multiVals}&${curr}=${val}`,
+                ''
+            );
+        }
+
+        if (['string', 'number'].includes(typeof q[curr]) && q[curr] !== '') {
+            value = `${curr}=${q[curr]}`;
+        }
+
+        return value === undefined
+            ? acc
+            : acc === ''
+                ? `${value}`
+                : `${acc}&${value}`;
+    }, '');
+
+    return query;
+};
+
+export const getImageSet = ({
+    id,
+    q = {
+        limit: 10,
+        offset: 0,
+        sort_by: '-created_at'
+    }
+}) => {
+    const query = getTableParams(q);
+    return instance.get(`${EDGE_API}/image-sets/${id}?${query}`);
+};
+
+export const getImageDataOnDevice = (id) => {
+    return instance.get(`${EDGE_API}/updates/device/${id}/image`);
+};
+
+export const getInventory = ({ query }) => {
+    const q = getTableParams(query);
+    return instance.get(`${EDGE_API}/devices/devicesview?${q}`);
+};
+
+export const getDevice = (id) => {
+    return instance.get(`${EDGE_API}/devices/${id}`);
+};
+
+export const updateSystem = async (payload) => {
+    return await instance.post(`${EDGE_API}/updates`, payload);
+};
