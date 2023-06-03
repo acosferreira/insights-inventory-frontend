@@ -10,10 +10,11 @@ const InventoryDetail = lazy(() => import('./routes/InventoryDetail'));
 const InventoryGroups = lazy(() => import('./routes/InventoryGroups'));
 const InventoryGroupDetail = lazy(() => import('./routes/InventoryGroupDetail'));
 const EdgeInventoryUpdate = lazy(() => import('./routes/SystemUpdate'));
-
+const EdgeInventoryDetail = lazy(() => import('./routes/EdgeSystemDetail'));
 
 export const routes = {
     table: '/',
+    edgeDetail: '/edge/:inventoryId',
     detail: '/:inventoryId',
     detailWithModal: '/:inventoryId/:modalId',
     groups: '/groups',
@@ -29,6 +30,7 @@ export const Routes = () => {
         <Suspense fallback="">
             <Switch>
                 <Route exact path={routes.update} component={EdgeInventoryUpdate} rootClass='inventory' />
+                <Route exact path={routes.edgeDetail} component={EdgeInventoryDetail} rootClass='inventory' />
                 <Route
                     exact
                     path={routes.table}
